@@ -71,17 +71,12 @@ function copyStartTemplate(){
 function generateEnode(){
     bootnode -genkey nodekey
     nodekey=$(cat nodekey)
-	bootnode -nodekey nodekey 2>enode.txt &
+	bootnode -nodekey nodekey -writeaddress >enode.txt &
 	pid=$!
 	sleep 5
 	kill -9 $pid
 	wait $pid 2> /dev/null
-	re="enode://(.*)@"
-	enodestr=$(cat enode.txt)
-    
-    if [[ $enodestr =~ $re ]];
-    	then
-        enode=${BASH_REMATCH[1]};
+	enode=$(cat enode.txt)
         echo $enode > $projectName/node$1/enode.txt
         
         COMMA=","
@@ -89,8 +84,6 @@ function generateEnode(){
             COMMA=""
         fi
         echo \"enode://$enode@${DOCKER_NETWORK_IP}$(($1+1)):22001?discport=0\&raftport=22003\"$COMMA >> $projectName/static-nodes.json
-        
-    fi
     
     cp nodekey $projectName/node$1/node/qdata/geth/.
   
